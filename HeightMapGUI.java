@@ -47,7 +47,7 @@ public class HeightMapGUI extends JFrame implements ActionListener, ChangeListen
     	super("Heightmap GUI");
     	setBounds(280,100,1000,700);
     	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    	setResizable(false);
+    	setResizable(true);
     	Container cont = this.getContentPane();
     	cont.add(panel,BorderLayout.SOUTH);
     	cont.add(mapPanel,BorderLayout.CENTER);
@@ -78,27 +78,35 @@ public class HeightMapGUI extends JFrame implements ActionListener, ChangeListen
     }
     
     public void run(){
-    	try {
-    		while(true){
+    	
+		while(true){
+			try {
     			if (map != null){
+    				if (!mapPanel.compareDim(this.getContentPane().getWidth(), this.getContentPane().getHeight()))
+    					mapPanel.setDim(this.getContentPane().getWidth(), this.getContentPane().getHeight());
 		        	mapPanel.repaint();
 		        	//Thread.sleep(16);
     			}
-    		}
-    	}catch(Exception e){
-    		
-    	}
+    			else
+    			{
+    				System.out.println("a");
+    			}
+    		}catch(Exception e){
+    	    		
+    	    }
+		}
+    	
     }
     
     public double sliderLog(int n){
     	if (n <= 50){
     		return (0.0+n)/50.0;
-    	} else if (n<=60){
-    		return 1.0+(n-50.0)/10.0;
+    	} else if (n<=75){
+    		return 1.0+(n-50.0)/25.0;
     	} else if (n == 100) {
-    		return 300;
+    		return 10;
     	} else {
-    		return (2)*Math.exp((n-60.0)/8.0);
+    		return (2)*Math.exp((n-75.0)/15.0);
     	}
     }
     
@@ -162,6 +170,8 @@ public class HeightMapGUI extends JFrame implements ActionListener, ChangeListen
 		Object src = e.getSource();
 		if (src == genButton){
 				Heightmap hmap; 
+				if (sizeTF.getText().equals(""))
+					return;
 				try{
 				hmap = new Heightmap((int)(Math.pow(2,Integer.parseInt(sizeTF.getText())))+1,1000,sliderLog(volSlider.getValue()));
 				//hmap.printMap(hmap.getMap());
@@ -191,6 +201,9 @@ public class HeightMapGUI extends JFrame implements ActionListener, ChangeListen
 	class MapPanel extends JPanel implements MouseListener, MouseMotionListener {
 		
 		private BufferedImage canvas;
+		
+		private int width;
+		private int height;
    
     	int viewX = 0;
 		int viewY = 0;
@@ -202,12 +215,27 @@ public class HeightMapGUI extends JFrame implements ActionListener, ChangeListen
 		public MapPanel()
 		{
 			super();
+			width = 1000;
+			height = 700;
 			addMouseListener(this);
 			addMouseMotionListener(this);
-			canvas = new BufferedImage(1000,700,BufferedImage.TYPE_INT_ARGB);
+			canvas = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
 			initCanvas(Color.DARK_GRAY);
 			repaint();
 		}
+		
+		public MapPanel(int w, int h)
+		{
+			super();
+			width = w;
+			height = h;
+			addMouseListener(this);
+			addMouseMotionListener(this);
+			canvas = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+			initCanvas(Color.DARK_GRAY);
+			repaint();
+		}
+		
 		
 		@Override
 		public void update(Graphics g){
@@ -220,6 +248,7 @@ public class HeightMapGUI extends JFrame implements ActionListener, ChangeListen
 			super.paintComponent(g);
 			Graphics2D g2 = (Graphics2D)g;
 			
+			initCanvas(Color.DARK_GRAY);
 			genColMap();
 			
 			if (clicked){
@@ -341,8 +370,8 @@ public class HeightMapGUI extends JFrame implements ActionListener, ChangeListen
 					}*/
 					if (colMap != null){
 						if (colMap.length >= 1){
-							for(int y = viewY; y < viewY+700; y++){
-								for(int x = viewX; x < viewX+1000; x++){
+							for(int y = viewY; y < viewY+height; y++){
+								for(int x = viewX; x < viewX+width; x++){
 									if (y >= colMap.length || x >= colMap.length){
 										canvas.setRGB(x-viewX,y-viewY,(Color.DARK_GRAY).getRGB());
 									}
@@ -370,8 +399,8 @@ public class HeightMapGUI extends JFrame implements ActionListener, ChangeListen
 		}
 		
 		public void initCanvas(Color c){
-			for(int i = 0; i < 700; i++){
-				for(int j = 0; j < 1000; j++){
+			for(int i = 0; i < height; i++){
+				for(int j = 0; j < width; j++){
 					canvas.setRGB(j,i,c.getRGB());
 				}
 			}
@@ -400,6 +429,17 @@ public class HeightMapGUI extends JFrame implements ActionListener, ChangeListen
 		public void mouseDragged(MouseEvent e){
 			
 		}
+		public void setDim(int w, int h)
+		{
+			width = w;
+			height = h;
+			canvas = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+		}
+		public boolean compareDim (int w, int h)
+		{
+			return ((width == w) && (height == h));
+		}
 	}
+	
 }
 

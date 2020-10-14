@@ -1,1 +1,9 @@
 *.pptx
+*.jar
+/HeightMapGUI$MapPanel.class
+/HeightMapGUI.class
+/Heightmap.class
+/HeightmapConsole.class
+.project
+.classpath
+/HeightMapGUI$ResizeListener.class
